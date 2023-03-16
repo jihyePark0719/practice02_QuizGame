@@ -16,7 +16,7 @@ contract QuizTest is Test {
        address(quiz).call{value: 5 ether}("");
        q1 = quiz.getQuiz(1);
     }
-
+    
     function testAddQuizACL() public {
         uint quiz_num_before = quiz.getQuizNum();
         Quiz.Quiz_item memory q;
@@ -85,17 +85,23 @@ contract QuizTest is Test {
         uint256 prev_vb = quiz.vault_balance();
         uint256 prev_bet = quiz.bets(0, address(this));
         assertEq(quiz.solveQuiz(1, ""), false);
+        // 0번 QuizId?? 에 베팅한걸 꺼냄
         uint256 bet = quiz.bets(0, address(this));
         assertEq(bet, 0);
         assertEq(prev_vb + prev_bet, quiz.vault_balance());
     }
 
     function testClaim() public {
+        // QuizId=1 퀴즈 하나 풀고 맞춤
         quiz.betToPlay{value: q1.min_bet}(1);
         quiz.solveQuiz(1, quiz.getAnswer(1));
+        // 이 주소의 계좌 확인
         uint256 prev_balance = address(this).balance;
+        // claim 실행
         quiz.claim();
+        // claim 실행 후 계좌 확인
         uint256 balance = address(this).balance;
+        // claim 실행 전과 실행 후 차이가 베팅한 돈의 2배가 있어야 함
         assertEq(balance - prev_balance, q1.min_bet * 2);
     }
 
